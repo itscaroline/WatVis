@@ -1,74 +1,101 @@
+
 <!DOCTYPE html>
-<!-- 
-    For more information regarding HTML and CSS basics, please visit:
-    https://www.w3schools.com/html/default.asp
-    https://www.w3schools.com/css/default.asp 
--->
-<html>
+<html lang="en">
 <head>
-    <meta charset="utf-8">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dandelion Diagram</title>
-    <script type="text/javascript" src="https://d3js.org/d3.v5.min.js"></script>
-
-    <style>
-        .canvas {
-            font: 10px sans-serif;
-            background-color: white;
-            width: 800px;
-            height: 800px;
-            /* using background size to move, not sure how else to center */
-            /* https://drive.google.com/file/d/1IR_XVNa_F10BWAPgAlpO6q3ypecyodNo/view?usp=sharing */
-            background-image: url("background.png");
-            background-position: top left;
-            background-repeat: no-repeat;
-            background-size: 925px;
-        }
-        
-    </style>
+    <script type="text/javascript" src="https://d3js.org/d3.v4.min.js"></script>
 </head>
-
 <body>
     <div>
-        <svg class="canvas"></svg>
+        <svg class = "canvas">
+        </svg>
     </div>
     <script type="text/javascript">
-        var w = 15, h = 15
+        var svg_width = 1665, svg_height = 990;
+        var bg_url = 'background.png', data_url = 'https://raw.githubusercontent.com/itscaroline/dd/main/RangeTimeCriticalIncidents.xlsx%20-%20Sheet1.csv';
+        var dataset;
+        var x_bound = 13700, y_bound = 8150;
 
-        const unique = (array) => array.filter((value, index, self) => self.indexOf(value) === index);
+        var svg = d3.select('svg').attr('width', svg_width)
+                .attr('height', svg_height);
 
-        var color = d3.scaleOrdinal(d3.schemeCategory10);
+        svg.append('svg:image').attr('xlink:href', bg_url)
+                .attr('x', 0).attr('y', 0);
 
-        d3.csv('https://raw.githubusercontent.com/itscaroline/dd/main/RangeTimeCriticalIncidents.xlsx%20-%20Sheet1.csv', (d) => {
-            // convert to numerical values
-            d.x = +d.x
-            d.y = +d.y
+        console.log(Array(10));
+        var convertColor = function(id) {
+            console.log(id);
+            switch(id) {
+                case '26679':
+                    return 'magenta';
+                case '26675':
+                    return 'blue';
+                case '28166':
+                    return 'green';
+                case '26656':
+                    return 'red';
+                case '28266':
+                    //console.log(2);
+                    return 'grey';
+                case '28274':
+                    return 'yellow';
+                case '26689':
+                    return;
+                default:
+                    console.log(id);
+                    return 'orange';
+            }
+        }
 
-            return d;
-        }).then((data) => {
-            // Your d3 drawing code comes here
-            // The below example draws a simple "scatterplot"
-            console.log(data)
+        d3.csv(data_url, function(data) {
+            dataset = data.filter(function(x) {
+                return x.tracker !== '28266';
+            });
+            //console.log(dataset);
+            var xScale = d3.scaleLinear().domain([0, x_bound]).range([0, svg_width]),
+                yScale = d3.scaleLinear().domain([0, y_bound]).range([0, svg_height]);
 
-            const trackers = unique(data.map(d => d.tracker));
-
-            trackers.forEach(tracker => {
-                const color = "#" + Math.floor(Math.random()*16777215).toString(16);
-              d3.select('.canvas')
-                .selectAll('.dot')
-                .data(data.filter(d => d.tracker === tracker))
+            svg.selectAll("circle")
+                .data(dataset)
                 .enter()
-                .append('circle')
-                .style("fill", color)
-                .attr('cx', function(d) {
-                    return d.x / w;
+                .append("circle")
+                .attr("cx", function(datum, i){
+                    var xcoord = xScale(+datum.x);
+                    if (xcoord < 0 || xcoord > svg_width) {
+                        //console.log(i);
+                    }
+                    return xcoord;
                 })
-                .attr('cy', function(d) {
-                    return d.y / h;
+                .attr("cy", function(datum, i) {
+                    //console.log(yScale(datum.y));
+                    var ycoord = yScale(+datum.y);
+                    if (ycoord < 0 || ycoord > svg_height) {
+                        // console.log(i);
+                        // console.log(+datum.y);
+                    }
+                    return ycoord;
                 })
-                .attr('r', 1)
-            })
+                .attr("r", 1.25)
+                .style("fill", function(datum) {
+                    //console.log(datum.tracker);
+                    return convertColor(datum.tracker);
+                });
+        });
         
-        }) 
+            // var line = function(datum) {
+            //     return d3.line()
+            //         .x(function(datum) { return xScale(+datum.x);})
+            //         .y(function(datum) { return yScale(+datum.y)}); 
+            // }
+            //         d3.line()
+   
+            //         });
+            // svg.append("path").attr("d", function(d));
+
+
     </script>
 </body>
 </html>

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<!-- 
+    For more information regarding HTML and CSS basics, please visit:
+    https://www.w3schools.com/html/default.asp
+    https://www.w3schools.com/css/default.asp 
+-->
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Dandelion Diagram</title>
+    <script type="text/javascript" src="https://d3js.org/d3.v5.min.js"></script>
+
+    <style>
+        .canvas {
+            font: 10px sans-serif;
+            background-color: white;
+            width: 800px;
+            height: 800px;
+            /* using background size to move, not sure how else to center */
+            /* https://drive.google.com/file/d/1IR_XVNa_F10BWAPgAlpO6q3ypecyodNo/view?usp=sharing */
+            background-image: url("background.png");
+            background-position: top left;
+            background-repeat: no-repeat;
+            background-size: 925px;
+        }
+        
+    </style>
+</head>
+
+<body>
+    <div>
+        <svg class="canvas"></svg>
+    </div>
+    <script type="text/javascript">
+        var w = 15, h = 15
+
+        const unique = (array) => array.filter((value, index, self) => self.indexOf(value) === index);
+
+        var color = d3.scaleOrdinal(d3.schemeCategory10);
+
+        d3.csv('https://raw.githubusercontent.com/itscaroline/dd/main/RangeTimeCriticalIncidents.xlsx%20-%20Sheet1.csv', (d) => {
+            // convert to numerical values
+            d.x = +d.x
+            d.y = +d.y
+
+            return d;
+        }).then((data) => {
+            // Your d3 drawing code comes here
+            // The below example draws a simple "scatterplot"
+            console.log(data)
+
+            const trackers = unique(data.map(d => d.tracker));
+
+            trackers.forEach(tracker => {
+                const color = "#" + Math.floor(Math.random()*16777215).toString(16);
+              d3.select('.canvas')
+                .selectAll('.dot')
+                .data(data.filter(d => d.tracker === tracker))
+                .enter()
+                .append('circle')
+                .style("fill", color)
+                .attr('cx', function(d) {
+                    return d.x / w;
+                })
+                .attr('cy', function(d) {
+                    return d.y / h;
+                })
+                .attr('r', 1)
+            })
+        
+        }) 
+    </script>
+</body>
+</html>
