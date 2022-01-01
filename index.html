@@ -52,7 +52,7 @@
 
         d3.csv(data_url, function(data) {
             dataset = data.filter(function(x) {
-                return x.tracker !== '28266';
+                return x.tracker !== '26689';
             });
             //console.log(dataset);
             var xScale = d3.scaleLinear().domain([0, x_bound]).range([0, svg_width]),
@@ -83,6 +83,27 @@
                     //console.log(datum.tracker);
                     return convertColor(datum.tracker);
                 });
+
+                var line = d3.line()
+                            .x(function(d) {return xScale(+d.x); })
+                            .y(function(d) {return yScale(+d.y); });
+                
+                for (var i = 0; i < dataset.length - 1; i++) {
+                    var temp_data = [];
+                    temp_data.push(dataset[i]), temp_data.push(dataset[i+1]);
+                    svg.append("path")
+                        .datum(temp_data)   // datum bind data to each SVG, don't decompose it
+                        .attr("d", function(d) {return line(d);})
+                        .attr("class", "line")
+                        .attr("stroke-width", 0.15)
+                        .style("stroke", function(d) {
+                            return convertColor(d[0].tracker);
+                        })
+                        .attr('fill', 'none')
+                        .style('opacity', 0.4);
+                }
+
+            
         });
         
             // var line = function(datum) {
