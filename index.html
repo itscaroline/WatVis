@@ -100,21 +100,41 @@
                             return convertColor(d[0].tracker);
                         })
                         .attr('fill', 'none')
-                        .style('opacity', 0.4);
+                        .style('opacity', 0.7);
                 }
+                
 
+                
+                // draw triangle Spotlight metaphor
+                for (var i = 0; i < dataset.length; i++) {
+                    var grad = svg.append("defs") 
+                            .append("linearGradient")
+                            .attr("id", "grad" + i)
+                            .attr('x1', '0%')
+                            .attr('x2', '0%')
+                            .attr('y1', '0%')
+                            .attr('y2', '100%');
+
+                    grad.append("stop")
+                        .attr("offset", "0%")
+                        .attr('stop-color', function(d) {return convertColor(dataset[i].tracker)})
+                        .attr("stop-opacity", 0);
+
+                    grad.append("stop")
+                        .attr("offset", "100%")
+                        .attr('stop-color', function(d) {return convertColor(dataset[i].tracker)})
+                        .attr("stop-opacity", 0.1);
+                    
+                    svg.append('polygon')
+                        .attr('points', '0,0 15,-45 -15,-45')
+                        // .attr('transform', 'translate(50, 50) rotate(271)') 
+                        .attr('transform', 'translate(' + xScale(+dataset[i].x) + ', ' + yScale(+dataset[i].y) + ') rotate(' + dataset[i].rotation + ')')
+                        //.attr('fill', function(d) {return convertColor(dataset[i].tracker)})
+                        .attr('fill', 'url(#grad' + i + ')')
+    
+            }
             
         });
-        
-            // var line = function(datum) {
-            //     return d3.line()
-            //         .x(function(datum) { return xScale(+datum.x);})
-            //         .y(function(datum) { return yScale(+datum.y)}); 
-            // }
-            //         d3.line()
-   
-            //         });
-            // svg.append("path").attr("d", function(d));
 
 
     </script>
