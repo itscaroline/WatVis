@@ -18,6 +18,8 @@
         var bg_url = 'background.png', data_url = 'https://raw.githubusercontent.com/itscaroline/dd/main/RangeTimeCriticalIncidents.xlsx%20-%20Sheet1.csv';
         var dataset;
         var x_bound = 13700, y_bound = 8150;
+        var xScale = d3.scaleLinear().domain([0, x_bound]).range([0, svg_width]),
+            yScale = d3.scaleLinear().domain([0, y_bound]).range([0, svg_height]);
 
         var svg = d3.select('svg').attr('width', svg_width)
                 .attr('height', svg_height);
@@ -25,23 +27,26 @@
         svg.append('svg:image').attr('xlink:href', bg_url)
                 .attr('x', 0).attr('y', 0);
 
-        console.log(Array(10));
+
+
+
+        
         var convertColor = function(id) {
             console.log(id);
             switch(id) {
                 case '26679':
-                    return 'magenta';
+                    return '#e41a1c';
                 case '26675':
-                    return 'blue';
+                    return '#377eb8';
                 case '28166':
-                    return 'green';
+                    return '#4daf4a';
                 case '26656':
-                    return 'red';
+                    return '#984ea3';
                 case '28266':
-                    //console.log(2);
-                    return 'grey';
+                    
+                    return '#999999';
                 case '28274':
-                    return 'yellow';
+                    return '#ffff33';
                 case '26689':
                     return;
                 default:
@@ -54,29 +59,29 @@
             dataset = data.filter(function(x) {
                 return x.tracker !== '26689';
             });
+            for (var i = 0; i < dataset.length; i++) {
+                dataset[i].newx = xScale(+dataset[i].x);
+                dataset[i].newy = yScale(+dataset[i].y);
+            }
+            draw(0);
+            
+        });
+
+        var draw = function draw_graph(timestamp) {
             //console.log(dataset);
-            var xScale = d3.scaleLinear().domain([0, x_bound]).range([0, svg_width]),
-                yScale = d3.scaleLinear().domain([0, y_bound]).range([0, svg_height]);
+            
 
             svg.selectAll("circle")
                 .data(dataset)
                 .enter()
                 .append("circle")
                 .attr("cx", function(datum, i){
-                    var xcoord = xScale(+datum.x);
-                    if (xcoord < 0 || xcoord > svg_width) {
-                        //console.log(i);
-                    }
-                    return xcoord;
+                    return datum.newx;
                 })
                 .attr("cy", function(datum, i) {
                     //console.log(yScale(datum.y));
-                    var ycoord = yScale(+datum.y);
-                    if (ycoord < 0 || ycoord > svg_height) {
-                        // console.log(i);
-                        // console.log(+datum.y);
-                    }
-                    return ycoord;
+                    
+                    return datum.newy;
                 })
                 .attr("r", 1.25)
                 .style("fill", function(datum) {
@@ -85,8 +90,8 @@
                 });
 
                 var line = d3.line()
-                            .x(function(d) {return xScale(+d.x); })
-                            .y(function(d) {return yScale(+d.y); });
+                            .x(function(d) {return d.newx; })
+                            .y(function(d) {return d.newy; });
                 
                 for (var i = 0; i < dataset.length - 1; i++) {
                     var temp_data = [];
@@ -123,20 +128,17 @@
                     grad.append("stop")
                         .attr("offset", "100%")
                         .attr('stop-color', function(d) {return convertColor(dataset[i].tracker)})
-                        .attr("stop-opacity", 0.1);
+                        .attr("stop-opacity", 0.05);
                     
                     svg.append('polygon')
-                        .attr('points', '0,0 15,-45 -15,-45')
+                        .attr('points', '0,0 20,-60 -20,-60')
                         // .attr('transform', 'translate(50, 50) rotate(271)') 
-                        .attr('transform', 'translate(' + xScale(+dataset[i].x) + ', ' + yScale(+dataset[i].y) + ') rotate(' + dataset[i].rotation + ')')
+                        .attr('transform', 'translate(' + dataset[i].newx + ', ' + dataset[i].newy + ') rotate(' + dataset[i].rotation + ')')
                         //.attr('fill', function(d) {return convertColor(dataset[i].tracker)})
                         .attr('fill', 'url(#grad' + i + ')')
     
             }
-            
-        });
-
-
+        }
     </script>
 </body>
 </html>
